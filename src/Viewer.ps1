@@ -17,10 +17,13 @@
 
 $ThumbW = 96; $ThumbH = 72
 
-function Load-Unlocked([string]$path) {
+function Load-Unlocked([string]$path, [switch]$Fast) {
     # load via memory stream so the file on disk is never locked
+    # -Fast skips the full-picture decode GDI+ does to validate; thumbnails then come from the
+    # small preview cameras embed. The big picture keeps the check, so a damaged file fails here.
     $bytes = [System.IO.File]::ReadAllBytes($path)
     $ms = New-Object System.IO.MemoryStream(,$bytes)
+    if ($Fast) { return [System.Drawing.Image]::FromStream($ms, $false, $false) }
     return [System.Drawing.Image]::FromStream($ms)
 }
 
@@ -31,6 +34,8 @@ function Save-Rotated([System.Drawing.Image]$img, [string]$path) {
         $pi.Value = [BitConverter]::GetBytes([UInt16]1)
         $img.SetPropertyItem($pi)
     }
+    # the preview the camera embedded still shows the old way round - drop it
+    if ($img.PropertyIdList -contains 0x501B) { try { $img.RemovePropertyItem(0x501B) } catch { } }
     $enc = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq "image/jpeg" }
     $ep  = New-Object System.Drawing.Imaging.EncoderParameters(1)
     $ep.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [long]95)
@@ -68,14 +73,19 @@ function Remove-Photos([string[]]$paths, [string[]]$companions) {
     # originals); those twins go to the bin too.
     Add-Type -AssemblyName Microsoft.VisualBasic
     $n = 0
+    # list each companion folder once: base name -> files (keys ignore case, as -eq did)
+    $byBase = @{}
+    foreach ($dir in $companions) {
+        if (-not $dir) { continue }
+        foreach ($cf in @(Get-ChildItem -LiteralPath $dir -File -ErrorAction SilentlyContinue)) {
+            if (-not $byBase.ContainsKey($cf.BaseName)) { $byBase[$cf.BaseName] = New-Object System.Collections.ArrayList }
+            [void]$byBase[$cf.BaseName].Add($cf.FullName)
+        }
+    }
     foreach ($p in $paths) {
         if (-not (Test-Path -LiteralPath $p)) { continue }
         $base = [System.IO.Path]::GetFileNameWithoutExtension($p)
-        $twins = @()
-        foreach ($dir in $companions) {
-            if (-not $dir) { continue }
-            $twins += @(Get-ChildItem -LiteralPath $dir -File -ErrorAction SilentlyContinue | Where-Object { $_.BaseName -eq $base } | Select-Object -ExpandProperty FullName)
-        }
+        $twins = @(); if ($byBase.ContainsKey($base)) { $twins = @($byBase[$base]) }
         foreach ($f in @($p) + $twins) {
             try {
                 [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($f, "OnlyErrorDialogs", "SendToRecycleBin")
@@ -106,8 +116,12 @@ function New-TextTile([string]$text) {
 
 function New-Thumbnail([string]$path) {
     try {
-        $img = Load-Unlocked $path
+        $img = Load-Unlocked $path -Fast
     } catch { return (New-TextTile "?") }
+    try { return (New-ThumbnailFromImage $img) } finally { $img.Dispose() }
+}
+
+function New-ThumbnailFromImage([System.Drawing.Image]$img) {
     try {
         $scale = [math]::Min($ThumbW / $img.Width, $ThumbH / $img.Height)
         $w = [math]::Max(1, [int]($img.Width * $scale)); $h = [math]::Max(1, [int]($img.Height * $scale))
@@ -121,7 +135,62 @@ function New-Thumbnail([string]$path) {
         return $bmp
     } catch {
         return (New-TextTile "?")
-    } finally { $img.Dispose() }
+    }
+}
+
+# ------------------------------------------------------------
+#  Filmstrip: one panel that draws only the thumbnails in view.
+#  (One control per photo breaks past ~309 photos: Windows can't
+#  place a control beyond 32767 px, so later tiles pile up.)
+# ------------------------------------------------------------
+
+$TilePitch = $ThumbW + 10     # 102 px tile + 2 px margin each side
+
+function Update-StripScroll($v) {
+    $view = [math]::Max(1, $v.strip.ClientSize.Width)
+    $total = $v.items.Count * $TilePitch
+    if ($total -le $view) { $v.scroll.Value = 0; $v.scroll.Enabled = $false; return }
+    $v.scroll.Enabled = $true
+    $v.scroll.Maximum = $total - 1
+    $v.scroll.LargeChange = $view
+    $v.scroll.SmallChange = $TilePitch
+    $top = $total - $view
+    if ($v.scroll.Value -gt $top) { $v.scroll.Value = $top }
+}
+
+function Show-StripItem($v, [int]$i) {
+    # scroll just enough to bring tile $i into view
+    Update-StripScroll $v
+    if ($v.scroll.Enabled) {
+        $x = $i * $TilePitch; $view = $v.strip.ClientSize.Width; $top = $v.items.Count * $TilePitch - $view
+        $val = $v.scroll.Value
+        if ($x -lt $val) { $val = $x } elseif ($x + $TilePitch -gt $val + $view) { $val = $x + $TilePitch - $view }
+        $v.scroll.Value = [int][math]::Max(0, [math]::Min($val, $top))
+    }
+    $v.strip.Invalidate()
+}
+
+function Get-StripIndex($v, [int]$x) {
+    # which tile is under x (strip coordinates), or -1
+    $i = [int][math]::Floor(($x + $v.scroll.Value) / $TilePitch)
+    if ($i -lt 0 -or $i -ge $v.items.Count) { return -1 }
+    return $i
+}
+
+function Draw-Strip($v, [System.Drawing.Graphics]$g) {
+    if ($v.items.Count -eq 0) { return }
+    $off = $v.scroll.Value
+    $first = [int][math]::Max(0, [math]::Floor($off / $TilePitch))
+    $last = [int][math]::Min($v.items.Count - 1, [math]::Floor(($off + $v.strip.ClientSize.Width) / $TilePitch))
+    for ($i = $first; $i -le $last; $i++) {
+        $it = $v.items[$i]
+        $x = $i * $TilePitch - $off + 2
+        $back = $RetroDark
+        if ($it.marked) { $back = $RetroRed } elseif ($i -eq $v.current) { $back = $RetroNavy }
+        $br = New-Object System.Drawing.SolidBrush($back)
+        $g.FillRectangle($br, $x, 2, ($ThumbW + 6), ($ThumbH + 6)); $br.Dispose()
+        if ($it.thumb) { $g.DrawImage($it.thumb, ($x + 3), 5, $ThumbW, $ThumbH) }
+    }
 }
 
 # ------------------------------------------------------------
@@ -151,9 +220,12 @@ function New-PhotoViewer([string]$title) {
     # filmstrip: one row of thumbnails, scrolling sideways
     $stripFrame = New-Object System.Windows.Forms.Panel
     $stripFrame.Dock = "Bottom"; $stripFrame.Height = ($ThumbH + 30); $stripFrame.BorderStyle = "Fixed3D"; $stripFrame.BackColor = $RetroDark
-    $strip = New-Object System.Windows.Forms.FlowLayoutPanel
-    $strip.Dock = "Fill"; $strip.WrapContents = $false; $strip.AutoScroll = $true; $strip.FlowDirection = "LeftToRight"
+    $strip = New-Object System.Windows.Forms.PictureBox     # double-buffered, so scrolling doesn't flicker
+    $strip.Dock = "Fill"; $strip.BackColor = $RetroDark; $strip.Cursor = "Hand"
+    $scroll = New-Object System.Windows.Forms.HScrollBar
+    $scroll.Dock = "Bottom"; $scroll.Enabled = $false
     $stripFrame.Controls.Add($strip)
+    $stripFrame.Controls.Add($scroll)
 
     # bottom bar: progress while importing, buttons while reviewing
     $bar = New-Object System.Windows.Forms.Panel
@@ -199,7 +271,7 @@ function New-PhotoViewer([string]$title) {
     $body.BringToFront()
 
     $v = @{
-        form = $form; pic = $pic; status = $status; caption = $caption; strip = $strip; progress = $progress
+        form = $form; pic = $pic; status = $status; caption = $caption; strip = $strip; scroll = $scroll; progress = $progress
         hint = $hint; buttons = $buttons; items = New-Object System.Collections.ArrayList
         mode = "import"; current = -1; img = $null; rot = 0; finished = $false
         review = @(); pos = 0; rotated = 0; lastBig = [datetime]::MinValue; pending = -1; closing = $false
@@ -233,7 +305,14 @@ function New-PhotoViewer([string]$title) {
         if ($vv.mode -eq "review") { Invoke-ViewerAction $vv "done" }     # X = finish the review
         else { $this.WindowState = "Minimized" }                          # X while copying = get out of the way
     })
-    $form.Add_Resize({ $vv = $this.Tag; if ($vv) { $vv.strip.PerformLayout() } })
+    $strip.Add_Paint({ $vv = $this.FindForm().Tag; if ($vv) { Draw-Strip $vv $_.Graphics } })
+    $strip.Add_MouseDown({
+        $vv = $this.FindForm().Tag
+        $i = Get-StripIndex $vv $_.X
+        if ($i -ge 0) { Select-ViewerItem $vv $i }
+    })
+    $strip.Add_Resize({ $vv = $this.FindForm().Tag; if ($vv) { Update-StripScroll $vv; $vv.strip.Invalidate() } })
+    $scroll.Add_ValueChanged({ $vv = $this.FindForm().Tag; if ($vv) { $vv.strip.Invalidate() } })
     return $v
 }
 
@@ -272,23 +351,12 @@ function New-VideoTile([string]$frame) {
 function Add-ViewerPhoto($v, [string]$path, [string]$caption, [string]$placeholder = "", [string]$frame = "") {
     # $placeholder ("VIDEO", "RAW"...): a labelled tile instead of a picture, never reviewed;
     # $frame: a still to show on a VIDEO tile
-    $item = @{ path = $path; caption = $caption; isPhoto = (-not $placeholder); marked = $false; tile = $null }
+    $item = @{ path = $path; caption = $caption; isPhoto = (-not $placeholder); marked = $false; thumb = $null }
+    if ($placeholder -and $frame -and (Test-Path -LiteralPath $frame)) { $item.thumb = New-VideoTile $frame }
+    elseif ($placeholder) { $item.thumb = New-TextTile $placeholder }
+    else { $item.thumb = New-Thumbnail $path }
     $idx = $v.items.Add($item)
-    $tile = New-Object System.Windows.Forms.PictureBox
-    $tile.Size = New-Object System.Drawing.Size(($ThumbW + 6), ($ThumbH + 6))
-    $tile.Padding = New-Object System.Windows.Forms.Padding(3)
-    $tile.Margin = New-Object System.Windows.Forms.Padding(2, 2, 2, 2)
-    $tile.BackColor = $RetroDark
-    $tile.SizeMode = "CenterImage"
-    $tile.Cursor = "Hand"
-    $tile.Tag = $idx
-    if ($placeholder -and $frame -and (Test-Path -LiteralPath $frame)) { $tile.Image = New-VideoTile $frame }
-    elseif ($placeholder) { $tile.Image = New-TextTile $placeholder }
-    else { $tile.Image = New-Thumbnail $path }
-    $tile.Add_Click({ $vv = $this.FindForm().Tag; Select-ViewerItem $vv $this.Tag })
-    $item.tile = $tile
-    $v.strip.Controls.Add($tile)
-    $v.strip.ScrollControlIntoView($tile)
+    Show-StripItem $v $idx
     # big picture follows along, but at most a few times a second (big photos are slow to decode)
     if ($v.mode -eq "import" -and $item.isPhoto -and ([datetime]::Now - $v.lastBig).TotalMilliseconds -gt 400) {
         Show-ViewerItem $v $idx
@@ -313,10 +381,8 @@ function Show-LatestPhoto($v, [switch]$Now) {
 function Set-ViewerHint($v, [string]$text) { $v.hint.Text = $text; Update-Viewer $v }
 
 function Set-TileLook($v, [int]$i) {
-    $it = $v.items[$i]
-    if ($it.marked) { $it.tile.BackColor = $RetroRed }
-    elseif ($i -eq $v.current) { $it.tile.BackColor = $RetroNavy }
-    else { $it.tile.BackColor = $RetroDark }
+    # tile colours (red = marked, navy = current) are drawn by Draw-Strip
+    $v.strip.Invalidate()
 }
 
 function Show-ViewerItem($v, [int]$i) {
@@ -332,7 +398,7 @@ function Show-ViewerItem($v, [int]$i) {
         try { $v.img = Load-Unlocked $it.path; $v.pic.Image = $v.img }
         catch { $v.caption.Text = "$($it.caption)   (preview not available)" }
     }
-    $v.strip.ScrollControlIntoView($it.tile)
+    Show-StripItem $v $i
     if ($v.mode -eq "review") { Update-ReviewStatus $v }
 }
 
@@ -364,9 +430,11 @@ function Save-CurrentRotation($v) {
     try {
         Save-Rotated $v.img $it.path
         $v.rotated++
-        $old = $it.tile.Image
-        $it.tile.Image = New-Thumbnail $it.path
+        # the picture in memory is already turned - no need to read the file back
+        $old = $it.thumb
+        $it.thumb = New-ThumbnailFromImage $v.img
         if ($old) { $old.Dispose() }
+        $v.strip.Invalidate()
     } catch {
         [void][System.Windows.Forms.MessageBox]::Show($v.form, "$($_.Exception.Message)", "Camera Ingest", "OK", "Warning")
     }
@@ -426,10 +494,9 @@ function Invoke-ViewerAction($v, [string]$act) {
 
 function Invoke-ViewerReview($v, [string[]]$files, [string[]]$companions, [string]$intro, [string]$doneText = "Done") {
     # Turn the window into the review and wait until Done. Returns what was changed.
+    $shown = @{}; foreach ($it in $v.items) { $shown[$it.path] = $true }
     foreach ($f in $files) {
-        $known = $false
-        foreach ($it in $v.items) { if ($it.path -eq $f) { $known = $true; break } }
-        if (-not $known) { Add-ViewerPhoto $v $f (Split-Path $f -Leaf) }
+        if (-not $shown.ContainsKey($f)) { Add-ViewerPhoto $v $f (Split-Path $f -Leaf); $shown[$f] = $true }
     }
     $want = @{}; foreach ($f in $files) { $want[$f] = $true }
     $v.review = @(for ($i = 0; $i -lt $v.items.Count; $i++) { if ($v.items[$i].isPhoto -and $want.ContainsKey($v.items[$i].path)) { $i } })
@@ -479,7 +546,7 @@ function Close-Viewer($v) {
     if (-not $v -or $v.form.IsDisposed) { return }
     $v.closing = $true
     if ($v.img) { $v.pic.Image = $null; $v.img.Dispose(); $v.img = $null }
-    foreach ($it in $v.items) { if ($it.tile -and $it.tile.Image) { $it.tile.Image.Dispose() } }
+    foreach ($it in $v.items) { if ($it.thumb) { $it.thumb.Dispose() } }
     $v.form.Close(); $v.form.Dispose()
     [System.Windows.Forms.Application]::DoEvents()
 }

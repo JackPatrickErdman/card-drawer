@@ -47,7 +47,23 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 Add-ViewerPhoto $v "" "MOV00007.AVI  ->  Demo Cam (7).MP4" "VIDEO"
 Set-ViewerStatus $v "Copied 7 of 7 - getting the review ready..." 7 7
 Save-ViewerSnapshot $v (Join-Path $Out "viewer-import.png")
-Check "import mode: one tile per file, video as a labelled tile" ($v.strip.Controls.Count -eq 7)
+Check "import mode: one tile per file, video as a labelled tile" ($v.items.Count -eq 7 -and @($v.items | Where-Object { $_.thumb }).Count -eq 7)
+$turned = New-Object System.Drawing.Bitmap 640, 480
+Check "rotated thumbnails come from the picture in memory" ((New-ThumbnailFromImage $turned).Width -eq $ThumbW)
+$turned.Dispose()
+
+# ---- a long filmstrip: one control per photo broke past ~309 tiles (32767 px) ----
+$long = New-PhotoViewer "Importing - Long Strip"
+Show-Viewer $long
+for ($i = 1; $i -le 700; $i++) { [void]$long.items.Add(@{ path = "x$i"; caption = ""; isPhoto = $false; marked = $false; thumb = $null }) }
+Show-StripItem $long 699; Update-Viewer $long
+$w = $long.strip.ClientSize.Width
+$atEnd = Get-StripIndex $long ($w - 5)
+Show-StripItem $long 400; Update-Viewer $long
+$at400 = @(0..($w - 1) | Where-Object { (Get-StripIndex $long $_) -eq 400 }).Count
+Show-StripItem $long 0; Update-Viewer $long
+Check "700-photo strip: last tile reachable ($atEnd), tile 400 has its own place ($at400 px), back to the start ($(Get-StripIndex $long 5))" ($atEnd -eq 699 -and $at400 -eq $TilePitch -and (Get-StripIndex $long 5) -eq 0)
+Close-Viewer $long
 
 # ---- review mode, driven by the same actions the buttons/keys use ----
 $script:step = 0

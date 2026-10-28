@@ -128,12 +128,15 @@ function Set-JpegDate([string]$path, [datetime]$when) {
 
     $new = [System.Text.Encoding]::ASCII.GetBytes($when.ToString("yyyy:MM:dd HH:mm:ss"))
     $changed = 0
+    # Latin-1 maps every byte to exactly one character, so a string position is a byte
+    # position and .NET's IndexOf does the search (a byte loop in PowerShell took ~1 s a photo)
+    $latin1 = [System.Text.Encoding]::GetEncoding(28591)
     foreach ($s in $old) {
-        $pat = [System.Text.Encoding]::ASCII.GetBytes($s)
-        for ($i = $segStart; $i -le $segEnd - 19; $i++) {
-            $hit = $true
-            for ($j = 0; $j -lt 19; $j++) { if ($bytes[$i + $j] -ne $pat[$j]) { $hit = $false; break } }
-            if ($hit) { [Array]::Copy($new, 0, $bytes, $i, 19); $changed++; $i += 18 }
+        $seg = $latin1.GetString($bytes, $segStart, $segEnd - $segStart)
+        $at = $seg.IndexOf($s, [System.StringComparison]::Ordinal)
+        while ($at -ge 0) {
+            [Array]::Copy($new, 0, $bytes, $segStart + $at, 19); $changed++
+            $at = $seg.IndexOf($s, $at + 19, [System.StringComparison]::Ordinal)
         }
     }
     if ($changed -eq 0) { return 0 }
@@ -463,10 +466,11 @@ function Invoke-CameraImportCore {
     # ---- What's on the source ----
     # Numbered in shooting order. Same-name files (a RAW+JPEG pair) stay together, sorted
     # by the pair's earliest time, with the RAW first so it can claim its JPG twin.
-    $groupTime = @{}
+    $groupTime = @{}; $jpgTwin = @{}     # $jpgTwin: folder\name -> the JPG a RAW+JPEG camera shot beside a RAW
     foreach ($f in $Source.media) {
         $k = Join-Path $f.DirectoryName $f.BaseName
         if (-not $groupTime.ContainsKey($k) -or $f.LastWriteTime -lt $groupTime[$k]) { $groupTime[$k] = $f.LastWriteTime }
+        if ($f.Extension -match '^\.jpe?g$' -and -not $jpgTwin.ContainsKey($k)) { $jpgTwin[$k] = $f }
     }
     $files = @($Source.media | Sort-Object { $groupTime[(Join-Path $_.DirectoryName $_.BaseName)] }, DirectoryName, BaseName, {
         if ((Get-MediaKind $_.Extension) -eq "raw") { 0 } else { 1 } })
@@ -567,8 +571,15 @@ function Invoke-CameraImportCore {
             $result.skippedDup++
             # Only clear it off the card if a byte-identical copy really is on the PC. A name
             # match isn't enough: the old copy may have been deleted and the name reused.
-            $priorOnDisk = @(@($destination, $origDir, $rawDir, $staging, $unprocDir, $workDir) | Where-Object { Test-SameHash (Join-Path $_ $prior) $hash })
-            if ($deleteOK -and $priorOnDisk.Count -gt 0) {
+            # Only checked when it would be deleted: hashing old copies costs time, and in an
+            # iCloud folder set to "Optimize storage" it would download them again.
+            $priorOnDisk = $false
+            if ($deleteOK) {
+                foreach ($d in @($destination, $origDir, $rawDir, $staging, $unprocDir, $workDir)) {
+                    if (Test-SameHash (Join-Path $d $prior) $hash) { $priorOnDisk = $true; break }
+                }
+            }
+            if ($priorOnDisk) {
                 Remove-Item -LiteralPath $f.FullName -Force -ErrorAction SilentlyContinue
                 Write-Host "  Skipped $($f.Name): previously imported as '$prior'. Removed from card." -ForegroundColor Yellow
             } else {
@@ -680,8 +691,8 @@ function Invoke-CameraImportCore {
             $jpgName = Get-FreeName $staging "$newBase.JPG"
             $jpgTarget = Join-Path $staging $jpgName
             $jpgFrom = ""
-            $twin = Get-ChildItem -LiteralPath $f.DirectoryName -File -ErrorAction SilentlyContinue |
-                Where-Object { $_.BaseName -eq $f.BaseName -and $_.Extension -match '^\.jpe?g$' } | Select-Object -First 1
+            $twin = $jpgTwin[(Join-Path $f.DirectoryName $f.BaseName)]
+            if ($twin -and -not (Test-Path -LiteralPath $twin.FullName)) { $twin = $null }
             if ($twin) {
                 $twinHash = (Get-FileHash -LiteralPath $twin.FullName -Algorithm SHA256).Hash
                 if (-not $seen.ContainsKey($twinHash)) {
