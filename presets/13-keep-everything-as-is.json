@@ -1,0 +1,24 @@
+{
+    "preset":  "Archive exactly as shot",
+    "description":  "No renaming, no conversion, RAW sent as-is, nothing deleted. For people who just want a safe, deduplicated copy of every card.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  ""
+                             },
+                   "naming":  "{orig}",
+                   "dates":  "capture",
+                   "deleteFromCard":  false,
+                   "convertVideo":  false,
+                   "rawMode":  "copy",
+                   "review":  "never",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

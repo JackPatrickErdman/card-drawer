@@ -1,0 +1,24 @@
+{
+    "preset":  "Dashcam / DVR / spy or body cam (videos only)",
+    "description":  "Catches any card with ONLY videos on it. These clocks are usually wrong, so files get the import date, written inside the video too. Old AVI/MOV formats are converted to MP4, originals kept.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  "videos"
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "import",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "never",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

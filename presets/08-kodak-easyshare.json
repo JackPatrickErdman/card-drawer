@@ -1,0 +1,24 @@
+{
+    "preset":  "Kodak EasyShare",
+    "description":  "Any card with photos made by Kodak (maker \u0027EASTMAN KODAK COMPANY\u0027).",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "KODAK",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  ""
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "capture",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "ask",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

@@ -1,0 +1,5 @@
+# personal settings, created on first run
+data/
+# locally dropped tools (HandBrakeCLI.exe, ffmpeg.exe) - never committed, see README
+tools/
+*.tmp

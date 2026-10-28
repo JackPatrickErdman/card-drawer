@@ -1,0 +1,24 @@
+{
+    "preset":  "Camera with a wrong or reset clock",
+    "description":  "For cameras that lost their date setting and stamp every photo years in the past. Files get the import date - written inside each photo and MP4/MOV too, which is what iCloud and phones sort by - so your timeline stays in order. Untouched originals are kept.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  ""
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "import",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "ask",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

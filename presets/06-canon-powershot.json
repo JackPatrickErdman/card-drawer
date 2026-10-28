@@ -1,0 +1,24 @@
+{
+    "preset":  "Canon PowerShot / IXUS / ELPH",
+    "description":  "Any card with photos whose camera model starts with \u0027Canon PowerShot\u0027, \u0027Canon IXUS\u0027, \u0027Canon DIGITAL IXUS\u0027 or \u0027Canon IXY\u0027.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "^Canon (PowerShot|DIGITAL IXUS|IXUS|IXY)",
+                                 "exifMake":  "",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  ""
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "capture",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "ask",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

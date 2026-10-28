@@ -1,0 +1,24 @@
+{
+    "preset":  "Any digital camera (catch-all)",
+    "description":  "Catches any card with photos that none of your other cameras claimed. Capture dates kept. Good first camera to add.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  "photos"
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "capture",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "ask",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

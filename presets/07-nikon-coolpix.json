@@ -1,0 +1,24 @@
+{
+    "preset":  "Nikon Coolpix",
+    "description":  "Any card with photos made by Nikon whose model is \u0027COOLPIX ...\u0027 or the older \u0027E####\u0027 style (e.g. E4500).",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "^(COOLPIX|E\\d{3,4}$)",
+                                 "exifMake":  "",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  ""
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "capture",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "ask",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

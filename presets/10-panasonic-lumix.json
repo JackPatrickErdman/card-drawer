@@ -1,0 +1,24 @@
+{
+    "preset":  "Panasonic Lumix",
+    "description":  "Any card with photos made by Panasonic (Lumix DMC-...). RW2 RAW kept on this PC.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "^Panasonic$",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  ""
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "capture",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "ask",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

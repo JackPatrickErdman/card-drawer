@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camera Ingest Guide</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --panel: #ffffff; --ink: #1d1f22; --muted: #5d636b; --line: #e3e0d8;
+    --accent: #0f6f7a; --accent-soft: #e2f1f2; --warn: #8a4b00; --warn-soft: #fff3e0;
+    --bad: #9b1c1c; --bad-soft: #fdecec; --code: #f2f0ea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15171a; --panel: #1c1f23; --ink: #e8e6e1; --muted: #a2a8b0; --line: #2f343a;
+      --accent: #5cc3cd; --accent-soft: #163236; --warn: #f2b65c; --warn-soft: #33270f;
+      --bad: #f19a9a; --bad-soft: #3a1b1b; --code: #25292e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "Segoe UI", system-ui, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 16px 80px; }
+  header h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  header p { color: var(--muted); margin: 0 0 24px; }
+  nav { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+        padding: 14px 18px; margin-bottom: 32px; }
+  nav ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 32px; }
+  nav a { color: var(--accent); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  h2 { font-size: 1.4rem; margin: 48px 0 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.08rem; margin: 26px 0 6px; }
+  p, li { max-width: 72ch; }
+  code, kbd { font-family: Consolas, "Cascadia Mono", monospace; font-size: 0.92em;
+              background: var(--code); padding: 1px 6px; border-radius: 4px; }
+  kbd { border: 1px solid var(--line); border-bottom-width: 2px; }
+  pre { background: var(--code); padding: 12px 14px; border-radius: 8px; overflow-x: auto;
+        font: 0.9rem/1.5 Consolas, "Cascadia Mono", monospace; }
+  .note, .warn, .bad { border-radius: 8px; padding: 12px 16px; margin: 16px 0; border-left: 4px solid; }
+  .note { background: var(--accent-soft); border-color: var(--accent); }
+  .warn { background: var(--warn-soft); border-color: var(--warn); }
+  .bad  { background: var(--bad-soft);  border-color: var(--bad); }
+  .note b:first-child, .warn b:first-child, .bad b:first-child { display: block; margin-bottom: 2px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  ol.steps { padding-left: 22px; }
+  ol.steps > li { margin-bottom: 8px; }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0; }
+  .flow span { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 0.92rem; }
+  .flow i { color: var(--muted); font-style: normal; }
+  .flow .cloud { border-color: var(--accent); color: var(--accent); }
+  @media (max-width: 640px) { nav ol { columns: 1; } header h1 { font-size: 1.6rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Camera Ingest</h1>
+  <p>How to set it up, import your cards, and send everything to iCloud Photos safely.</p>
+</header>
+
+<nav>
+  <ol>
+    <li><a href="#what">What it does</a></li>
+    <li><a href="#install">Installing</a></li>
+    <li><a href="#setup">First-time setup</a></li>
+    <li><a href="#cameras">Adding a camera</a></li>
+    <li><a href="#import">Importing cards</a></li>
+    <li><a href="#review">Rotating and deleting</a></li>
+    <li><a href="#icloud">Sending photos to iCloud</a></li>
+    <li><a href="#other-clouds">OneDrive, Google and others</a></li>
+    <li><a href="#safety">What keeps your photos safe</a></li>
+    <li><a href="#trouble">When something goes wrong</a></li>
+  </ol>
+</nav>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="what">1. What it does</h2>
+<p>You put a memory card in your computer. Camera Ingest works out <b>which of your cameras
+it came from</b> and copies everything off it the way you set up for that camera:</p>
+<ul>
+  <li>Files are renamed <code>Sony T7 (1).JPG</code>, <code>Sony T7 (2).JPG</code>&hellip; so two cameras never
+      produce clashing names.</li>
+  <li>Photos keep the date they were taken. For cameras whose clock is wrong, it uses today's date instead.</li>
+  <li>Videos in formats phones can't play (AVI, MPG, MTS&hellip;) are turned into MP4.</li>
+  <li>RAW files stay on your PC, and a normal JPG goes to your photo library.</li>
+  <li>It remembers every file it has ever imported, so <b>nothing is imported twice</b>, even months later.</li>
+  <li>Before anything goes out, you can flip through the new photos to rotate sideways ones and delete the duds.</li>
+</ul>
+<div class="flow">
+  <span>Card</span><i>&rarr; checked copy &rarr;</i><span>Incoming (on your PC)</span><i>&rarr; review &rarr;</i>
+  <span class="cloud">Your photo folder or iCloud</span>
+</div>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="install">2. Installing</h2>
+<p>You need Windows 10 or 11 and a card reader (built-in, or a cheap USB one). Nothing else has to be installed first.</p>
+<ol class="steps">
+  <li><b>Before unzipping:</b> right-click the downloaded zip &rarr; <b>Properties</b> &rarr; tick <b>Unblock</b>
+      (if you see it) &rarr; <b>OK</b>. This stops Windows from blocking every file inside.</li>
+  <li>Unzip it somewhere permanent, like <code>Documents\Camera Ingest</code>.</li>
+  <li>Double-click <b><code>Camera Ingest.bat</code></b>. The Camera Ingest window opens. For one-click
+      opening from now on, choose <b>File &rarr; Create Desktop Shortcut</b>.</li>
+</ol>
+<h3>The window</h3>
+<table>
+  <tr><th>Part</th><th>What it's for</th></tr>
+  <tr><td><b>Cards plugged in</b></td><td>Every memory card and USB drive in the PC, and which of your cameras each
+      belongs to. It updates by itself when a card goes in or comes out.</td></tr>
+  <tr><td><b>Cameras</b></td><td>Your cameras, how each is recognized, and an example of its file names.
+      Double-click one to change its settings; right-click for <b>Practice Run</b>, <b>Move Up / Down</b> and <b>Remove</b>.</td></tr>
+  <tr><td><b>Activity</b></td><td>What an import is doing right now, with a progress bar.</td></tr>
+  <tr><td>Buttons on the left</td><td><b>Import Now</b>, <b>Import Folder</b>, <b>Add Camera</b>, <b>Camera Settings</b> (Cameras &rarr; Camera Properties),
+      <b>Review Photos</b>, <b>Settings</b>, <b>Guide</b>. The same things, and a few more, are in the menus at the top.</td></tr>
+</table>
+<p>Prefer the keyboard? <b>Tools &rarr; Text Menus</b> (or <code>Text Menus.bat</code>) does everything with numbered
+questions, and <code>Import Now.bat</code> is a one-click import with no window.</p>
+<div class="warn"><b>"Windows protected your PC"</b>
+This blue box appears because the program isn't signed by a paid certificate (most small free tools aren't).
+Click <b>More info</b> &rarr; <b>Run anyway</b>. Everything it does is in plain-text scripts in the
+<code>src</code> folder that you, or anyone, can read.</div>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="setup">3. First-time setup</h2>
+<p>The first time, click <b>Set Up</b>. The Camera Ingest Setup window asks two things:</p>
+<ul>
+  <li><b>Library folder</b> &ndash; keep the suggested <code>Pictures\Camera Ingest</code> or click <b>Browse</b>. Each
+      camera gets a folder here for originals, RAW files and its import history.</li>
+  <li><b>Install the free video converter</b> &ndash; leave it ticked if any camera records video. It downloads ffmpeg
+      from the official source through Windows' own installer (a black window shows the progress).</li>
+</ul>
+<p>Click <b>Continue</b> and the <b>Add Camera</b> box opens for your first camera.</p>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="cameras">4. Adding a camera</h2>
+<p>You teach it each camera once. Do it with one of that camera's cards plugged in, so it can learn to recognize it.
+Click <b>Add Camera</b>. The box has four tabs, like a Windows settings sheet; everything has a sensible default.</p>
+<table>
+  <tr><th>Tab</th><th>What's on it</th></tr>
+  <tr><td><b>General</b></td><td>The camera's <b>name</b> (e.g. <code>Sony RX100</code>). <b>Use Card</b> learns from the
+      plugged-in card (its serial number and the camera model in its photos); <b>Use Folder</b> does the same from a folder
+      of its photos. <b>Start from a preset</b> fills in settings for a kind of camera; presets that fit your card say
+      <code>&lt;- fits this card</code>. <b>Recognized by</b> sums up how its cards will be spotted.</td></tr>
+  <tr><td><b>Recognize</b></td><td>The rules, if you want to change them: this exact card's serial number, the camera
+      model or maker written inside the photos, the file names, a fixed drive letter, and whether this camera should
+      take cards none of your other cameras recognize.</td></tr>
+  <tr><td><b>Files</b></td><td><b>Where finished photos go</b> (your library, iCloud Photos, or any folder &ndash; for
+      iCloud read <a href="#icloud">section 7</a> first). <b>File names</b>, with a live example that changes as you
+      choose (table below). Whether the camera's <b>clock</b> is right.</td></tr>
+  <tr><td><b>Import</b></td><td><b>Delete from the card</b> after each checked copy (off is the safe choice; when on, a
+      file is deleted only after its copy is checked to be byte-for-byte identical), <b>video conversion</b>, what to do
+      with <b>RAW</b> files, the <b>review</b>, and <b>start without asking</b>.</td></tr>
+</table>
+<p>File names:</p>
+<table>
+  <tr><th>Choice</th><th>Looks like</th></tr>
+  <tr><td>Running count</td><td><code>Sony RX100 (1).JPG</code>, <code>Sony RX100 (2).JPG</code>&hellip; and it carries on from the last import</td></tr>
+  <tr><td>Date and time taken</td><td><code>2026-06-15 14-30-05.JPG</code></td></tr>
+  <tr><td>Date + running count</td><td><code>2026-06-15 Sony RX100 (1).JPG</code></td></tr>
+  <tr><td>Camera's own names</td><td><code>DSC00042.JPG</code></td></tr>
+  <tr><td>Custom</td><td>Mix the pieces yourself, e.g. <code>{year}-{month} {name} {n:4}</code> gives
+      <code>2026-06 Sony RX100 0001.JPG</code>. The example updates as you type.</td></tr>
+</table>
+<p>If two files would get the same name (two shots in the same second, say), the second gets <code>_2</code> added.
+Nothing is ever overwritten. Folders are created for you.</p>
+<p>Click <b>Add Camera</b>. If you used a card, it offers a <b>practice run</b>: it copies the card into a separate
+practice folder so you can see the names and dates. <b>The card isn't changed and nothing goes to iCloud.</b></p>
+<h3>Changing a camera later</h3>
+<p>Double-click the camera in <b>Cameras</b> (or select it and click <b>Camera Settings</b> (Cameras &rarr; Camera Properties)). The same four tabs
+open with its current settings. <b>OK</b> saves them for the next import; <b>Cancel</b> changes nothing.</p>
+<div class="note"><b>Several cameras, one card reader</b>
+Cards are recognized by (in this order): the card's own serial number, the camera model or maker written inside the
+photos, the camera's file-naming style, a fixed drive letter, and finally "any card with photos" or "any card with only
+videos" catch-alls. If two cameras could claim a card, the one higher in <b>Cameras</b> wins: right-click &rarr;
+<b>Move Up</b>. <b>Cameras &rarr; Which Camera Is Each Card?</b> shows where every plugged-in card would go.</div>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="import">5. Importing cards</h2>
+<ol class="steps">
+  <li>Put a card in.</li>
+  <li>Check <b>Cards plugged in</b>: it shows which camera the card belongs to. Click <b>Import Now</b>.</li>
+  <li>A box lists the cards it's about to import. Click <b>OK</b> (cameras set to start without asking skip this).</li>
+  <li>The photo window shows the photos coming off the card, then the review (next section). The Activity box shows
+      the details, including an example of the new file names.</li>
+  <li>When it's done it ejects the card. "Safe to take out" means exactly that. Put the next card in and click
+      <b>Import Now</b> again.</li>
+</ol>
+<p>Got photos already on the PC, like an old backup folder? Click <b>Import Folder</b>.
+Nothing in that folder is ever deleted.</p>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="review">6. Watching the import, rotating and deleting</h2>
+<p>When you click <b>Import Now</b>, a second window pops up: the <b>photo window</b>.</p>
+<ul>
+  <li><b>While it copies</b>, each photo appears in it as it comes off the card: the newest one big, and a strip of
+      thumbnails growing along the bottom, with the camera's file name and its new name. Videos show as
+      <b>VIDEO</b> tiles. You can minimize it; the import carries on.</li>
+  <li><b>When the copying is done</b>, the same window turns into the <b>review</b>. Cameras without a tilt sensor
+      save sideways shots sideways, and every card has a few duds, so this is where you fix them before anything is sent.</li>
+</ul>
+<p><img src="docs/viewer.png" alt="The photo window in review mode" style="max-width:100%;border:1px solid var(--line)"></p>
+<table>
+  <tr><th>Button</th><th>Key</th><th>What it does</th></tr>
+  <tr><td><b>Next &gt;</b></td><td><kbd>Enter</kbd>, <kbd>Space</kbd> or <kbd>&rarr;</kbd></td><td>Keep this one (saving any turn) and go to the next</td></tr>
+  <tr><td><b>Rotate Left / Rotate Right / Rotate 180</b></td><td><kbd>L</kbd> / <kbd>R</kbd> / <kbd>U</kbd></td><td>Turn the photo. The picture updates straight away.</td></tr>
+  <tr><td><b>Delete</b></td><td><kbd>D</kbd> or <kbd>Delete</kbd></td><td>Mark it for deletion (red frame and banner) and move on. Press again (<b>Undelete</b>) to keep it after all.</td></tr>
+  <tr><td><b>&lt; Back</b></td><td><kbd>B</kbd> or <kbd>&larr;</kbd></td><td>Back one photo</td></tr>
+  <tr><td><b>Finish Import</b></td><td><kbd>Esc</kbd></td><td>Finish: deleted ones go to the Recycle Bin, the rest are sent</td></tr>
+</table>
+<p>Click any thumbnail to jump to it. Closing the window with its &times; also counts as Done.</p>
+<p>Using <code>Text Menus.bat</code> instead? At the end of an import you're asked
+<code>Type R + Enter to review the new photos</code>, and the same review window opens.</p>
+<ul>
+  <li>Marked photos go to the <b>Recycle Bin</b> when you click Done, so a mistake can be restored from there.
+      Their RAW file goes with them.</li>
+  <li>A photo you delete is remembered and <b>won't be imported again</b> the next time that card goes in.</li>
+  <li>The review is always optional: <b>Finish Import</b> straight away sends everything as it is. A camera set to
+      <b>never</b> review (double-click it under <b>Cameras</b> &rarr; <b>8</b>) skips it: the photo window shows the
+      copying, then closes by itself.</li>
+  <li>Rotated photos are re-saved at high quality. Photos you don't rotate are never re-saved.</li>
+</ul>
+<div class="note"><b>Why the review happens <i>before</i> sending</b>
+All of this happens while the photos are still in the local <code>Incoming</code> folder. Only when the window closes
+do they move on to iCloud or your destination folder. That order matters for iCloud: see the next section.</div>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="icloud">7. Sending photos to iCloud</h2>
+<p>Camera Ingest doesn't talk to Apple's servers. It hands photos to Apple's own <b>iCloud for Windows</b> app by
+putting them in the folder that app watches, and that app does the uploading. So iCloud for Windows has to be set up
+first.</p>
+
+<h3>Step 1: Set up iCloud for Windows</h3>
+<ol class="steps">
+  <li>Install <b>iCloud for Windows</b> from the Microsoft Store (it's free, made by Apple) and sign in with your Apple Account.</li>
+  <li>In iCloud for Windows, click the arrow next to <b>iCloud Photos</b>, turn <b>iCloud Photos</b> on, and click <b>Done</b>.</li>
+  <li>Open File Explorer &rarr; <b>Pictures</b>. You should now have <code>iCloud Photos</code>, with a
+      <code>Photos</code> folder inside. Apple's documented location is
+      <code>C:\Users\<i>your name</i>\Pictures\iCloud Photos\Photos</code>.</li>
+</ol>
+
+<h3>Step 2: Point a camera at iCloud</h3>
+<ul>
+  <li><b>New camera:</b> when it asks where finished photos should go, choose <b>2 iCloud Photos</b>.</li>
+  <li><b>Existing camera:</b> double-click it under <b>Cameras</b> &rarr; <b>2</b> (Goes to) &rarr; <b>2</b>.</li>
+</ul>
+<p>Each camera gets its own folder inside, like <code>iCloud Photos\Photos\Sony T7 Media</code>, so you can find
+things on the PC. Don't count on those folder names becoming albums in iCloud: on your iPhone the photos simply
+appear in your library, by the date they were taken.</p>
+<p>If the menu says <b>iCloud Photos (not found on this PC)</b>, your iCloud folder is somewhere else. Choose
+<b>3 Somewhere else</b> and browse to it.</p>
+
+<h3>Step 3: Do a one-photo test first</h3>
+<p>Before importing a whole card, use <b>Import Folder</b> on a folder with one or two photos in it, then
+check your iPhone's Photos app (or <code>icloud.com/photos</code>) after a few minutes.</p>
+<div class="warn"><b>Why the test matters</b>
+Apple documents two ways to upload from a PC: dragging photos onto <b>iCloud Photos</b> in File Explorer, or
+right-click &rarr; <b>Share</b> &rarr; <b>iCloud Photos</b>. Camera Ingest copies files into a folder inside iCloud
+Photos instead. That's how the author's own library has been fed for months, but it isn't one of Apple's documented
+methods, and iCloud for Windows changes between versions. The test takes two minutes and confirms it works on your
+PC before you rely on it.</div>
+
+<h3>The rules iCloud plays by, and what Camera Ingest does about each</h3>
+<table>
+  <tr><th>iCloud&hellip;</th><th>So Camera Ingest&hellip;</th></tr>
+  <tr><td><b>Uploads a file the moment it lands in the folder.</b> Apple says edits you make on a PC afterwards
+          <i>don't appear on your Apple devices</i>.</td>
+      <td>Holds photos in the local <code>Incoming</code> folder until you've had the chance to rotate or delete
+          them, and only then copies them in. Once a photo is in iCloud, rotate it on your iPhone, not on the PC.</td></tr>
+  <tr><td><b>Sorts photos by the date stored inside them</b>, not the file's date.</td>
+      <td>Keeps the real date. For cameras set to "clock is wrong", it writes today's date <i>inside</i> the photo
+          (and inside MP4/MOV videos), so they don't land years in the past. The untouched original is kept in
+          <code>Unprocessed Originals</code>.</td></tr>
+  <tr><td><b>Won't play some video formats</b> (AVI, MPG, MTS, ASF&hellip;).</td>
+      <td>Converts them to MP4 with the date written inside. The original stays in <code>Converted Originals</code>.</td></tr>
+  <tr><td><b>Counts every RAW file against your storage.</b></td>
+      <td>Keeps RAW files in <code>RAW Originals</code> on your PC and sends a full-size JPG.</td></tr>
+  <tr><td><b>Mirrors deletions.</b> Deleting a photo from the iCloud folder on your PC deletes it from
+          <b>every device</b>. Apple keeps it in <i>Recently Deleted</i> for 30 days.</td>
+      <td>Never deletes anything from your iCloud folder. Deleting in the review window happens in
+          <code>Incoming</code>, before iCloud ever sees the photo.</td></tr>
+  <tr><td><b>Needs room.</b> The free plan is 5 GB.</td>
+      <td>Can't check this for you. Look in iCloud for Windows to see how much space you have left before a big import.</td></tr>
+</table>
+<div class="bad"><b>The one way to delete from iCloud by accident</b>
+<b>Review Photos</b> works on any folder. If you point it at your iCloud folder, deleting a photo there
+deletes it from iCloud and all your devices too (it still goes to the Recycle Bin and Recently Deleted first).
+Rotating there won't reach your iPhone either. Use it on non-iCloud folders, and review new imports in the
+end-of-import window instead.</div>
+
+<h3>iCloud troubleshooting</h3>
+<table>
+  <tr><th>Problem</th><th>Try this</th></tr>
+  <tr><td>Photos aren't showing on my iPhone</td>
+      <td>Open iCloud for Windows: is it signed in, is iCloud Photos on, is uploading paused, is storage full?
+          Big imports can take hours to upload; the PC needs to stay on and awake.</td></tr>
+  <tr><td>Photos show up in the wrong year</td>
+      <td>That camera's clock is wrong. Double-click it under <b>Cameras</b> &rarr; <b>4</b> (Dates) &rarr; answer
+          <b>N</b> to "clock is right". Already-uploaded photos can be fixed on the iPhone (swipe up on a photo &rarr; Adjust).</td></tr>
+  <tr><td>A photo is sideways in iCloud</td>
+      <td>Rotate it on the iPhone. Rotating the PC copy won't sync. Next time, use the review window before sending.</td></tr>
+  <tr><td>A video didn't upload</td>
+      <td>Check <b>Settings</b> &rarr; <b>2 Tools</b>: without ffmpeg, AVI/MPG-style videos are copied as-is, and iCloud skips them.</td></tr>
+  <tr><td>"iCloud Photos (not found on this PC)"</td>
+      <td>Finish Step 1 above, or choose <b>3 Somewhere else</b> and browse to your iCloud Photos folder.</td></tr>
+</table>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="other-clouds">8. OneDrive, Google Drive and others</h2>
+<p>Any folder that a sync app watches works the same way: choose <b>3 Somewhere else</b> as the camera's destination
+and pick a folder inside your OneDrive (or Google Drive, Dropbox, a NAS share&hellip;). The same advice applies:
+review photos at the end of the import, before they're sent, and do a one-photo test first.</p>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="safety">9. What keeps your photos safe</h2>
+<ul>
+  <li><b>Checked copies.</b> Every file gets a fingerprint (SHA256). A copy only counts once its fingerprint matches the
+      original's exactly.</li>
+  <li><b>Card deletion is off unless you turn it on</b>, and even then it happens only after a checked copy. It never
+      formats a card.</li>
+  <li><b>Nothing is overwritten.</b> If a name is taken, it picks a new one.</li>
+  <li><b>Files reach iCloud (or any destination) once, finished.</b> Photos wait for the review; videos are converted
+      and re-dated on your PC first, then copied over in one go and checked. The cloud never sees a half-done file that
+      gets replaced later.</li>
+  <li><b>If the import history can't be written</b> (for example <code>imported_media.csv</code> is open in Excel), it
+      stops before touching anything, so nothing can be imported twice.</li>
+  <li><b>Originals are kept</b> whenever something changes a file: <code>Converted Originals</code> for videos,
+      <code>RAW Originals</code>, and <code>Unprocessed Originals</code> for re-dated or patched photos.</li>
+  <li><b>Interruptions are safe.</b> Pull the card, lose power or close the window mid-import, and run it again:
+      it picks up where it left off, offers any photos still waiting in <code>Incoming</code>, and imports nothing twice.</li>
+  <li><b>One import at a time.</b> A second window waits instead of colliding with the first.</li>
+  <li><b>Deletes go to the Recycle Bin</b>, never straight to permanent deletion.</li>
+  <li>It's tested with fake cards: a 1,500-file card with odd file names, a pulled card, broken copies, crashes,
+      and hundreds of randomized failures, all checked for "no photo lost, nothing overwritten".
+      Run <code>tests\Stress-Tests.ps1</code> to see for yourself.</li>
+</ul>
+<div class="note"><b>Want to see where everything went?</b>
+Each camera's folder in the library has its own <code>imported_media.csv</code>: every file it ever imported, what it
+was called on the card, what it's called now, and when. It opens in Excel.</div>
+
+<!-- ------------------------------------------------------------ -->
+<h2 id="trouble">10. When something goes wrong</h2>
+<table>
+  <tr><th>Problem</th><th>Try this</th></tr>
+  <tr><td>"No memory card or USB drive found" but the camera is plugged in</td>
+      <td>Cameras plugged in by USB often appear as a "portable device" with no drive letter, and Camera Ingest needs
+          a drive letter. Take the card out and use a card reader.</td></tr>
+  <tr><td>"Another Camera Ingest window is importing right now"</td>
+      <td>Let the other window finish, or close it, then try again. If no other window is open, restart the PC.</td></tr>
+  <tr><td>A card shows as <code>[ unknown ]</code></td>
+      <td>No camera claims it yet. Use <b>Add Camera</b>, or double-click the camera &rarr; <b>1 Recognition rules
+          &rarr; 1 Learn from a plugged-in card</b>.</td></tr>
+  <tr><td>A card goes to the wrong camera</td>
+      <td><b>My cameras &rarr; camera &rarr; T Test</b> shows which rule claimed it. Move the right camera up the list
+          (<b>U</b>), or give it this card's serial number.</td></tr>
+  <tr><td>A camera stopped being recognized after formatting its card on the PC</td>
+      <td>Formatting on a computer changes the card's serial number. Re-learn it from the plugged-in card
+          (formatting in the camera usually keeps it).</td></tr>
+  <tr><td>"Some files couldn't be deleted from the card"</td>
+      <td>Slide the lock switch on the side of the card to unlocked and import again.
+          Already-copied files are recognized, not copied twice.</td></tr>
+  <tr><td>"Photos from an interrupted earlier run"</td>
+      <td>Normal after a crash or closed window. They were safely copied but not sent yet. Review them, then they go out.</td></tr>
+</table>
+<p style="color:var(--muted);margin-top:32px">Settings live in <code>data\config.json</code> next to
+<code>Camera Ingest.bat</code>. Removing Camera Ingest means deleting its folder; your library and photos stay where they are.</p>
+
+</div>
+</body>
+</html>

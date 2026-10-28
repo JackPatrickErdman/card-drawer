@@ -1,0 +1,24 @@
+{
+    "preset":  "Sony Cyber-shot",
+    "description":  "Any card with photos made by Sony (camera maker in the photos). Memory Stick and SD. RAW (ARW) kept on this PC, a JPG goes out.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "^SONY$",
+                                 "fileNames":  "",
+                                 "drive":  "",
+                                 "content":  ""
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "capture",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "ask",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

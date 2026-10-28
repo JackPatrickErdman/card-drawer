@@ -1,0 +1,24 @@
+{
+    "preset":  "Fixed drive letter (dedicated reader)",
+    "description":  "Anything put in drive A: belongs to this camera - for a reader or drive that always gets the same letter and whose disks have no serial number. Files get the import date. Erases each file from the disk after a verified copy so it can be reused; turn that off to keep the disk as it is.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "",
+                                 "fileNames":  "",
+                                 "drive":  "A:",
+                                 "content":  ""
+                             },
+                   "naming":  "{name} ({n})",
+                   "dates":  "import",
+                   "deleteFromCard":  true,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "ask",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}

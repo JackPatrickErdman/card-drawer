@@ -1,0 +1,24 @@
+{
+    "preset":  "Camcorder (AVCHD / MOD / TOD / MiniDV-to-card)",
+    "description":  "Cards with camcorder video files (00000.MTS, MOV001.MOD, MOV001.TOD). Converted to MP4 with the real date written inside, originals kept.",
+    "camera":  {
+                   "match":  {
+                                 "serials":  [
+
+                                             ],
+                                 "exifModel":  "",
+                                 "exifMake":  "",
+                                 "fileNames":  "^(\\d{5}\\.MTS|MOV\\w+\\.(MOD|TOD))$",
+                                 "drive":  "",
+                                 "content":  ""
+                             },
+                   "naming":  "{date} {name} ({n})",
+                   "dates":  "capture",
+                   "deleteFromCard":  false,
+                   "convertVideo":  true,
+                   "rawMode":  "local",
+                   "review":  "never",
+                   "autoStart":  false,
+                   "photoHook":  ""
+               }
+}
