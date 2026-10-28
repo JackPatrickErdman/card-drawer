@@ -537,7 +537,8 @@ function Remove-SelectedCamera {
 function Invoke-Review {
     if (Test-Busy) { return }
     $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-    $dlg.Description = "Select a folder of photos to review. Do not select an iCloud Photos folder: deletions there are synchronized to all devices."
+    $dlg.Description = "Select a folder of photos to review."
+    if (Get-ICloudPhotosFolder) { $dlg.Description += " Do not select an iCloud Photos folder: deletions there are synchronized to all devices." }
     if ($dlg.ShowDialog($script:mainForm) -ne "OK") { return }
     # -Command with single quotes, not -File "...": a drive root like E:\ would turn \" into an
     # escaped quote and mangle the folder

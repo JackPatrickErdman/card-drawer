@@ -138,7 +138,8 @@ function Ask-Video($cam) {
 function Ask-Raw($cam) {
     Write-Host ""
     Write-Host "  RAW photos (ARW, NEF, CR2, DNG...):" -ForegroundColor White
-    Write-Host "    1  Keep the RAW on this PC, send a full-size JPG  (best for iCloud / Google Photos)"
+    $best = ""; if (Get-ICloudPhotosFolder) { $best = "  (best for iCloud / Google Photos)" }
+    Write-Host "    1  Keep the RAW on this PC, send a full-size JPG$best"
     Write-Host "    2  Send the RAW file itself to the destination"
     $d = "1"; if ($cam.rawMode -eq "copy") { $d = "2" }
     if ((Read-Choice "Choose 1-2" @("1", "2") $d) -eq "2") { $cam.rawMode = "copy" } else { $cam.rawMode = "local" }
@@ -809,13 +810,13 @@ function Invoke-FirstRunSetup {
     Write-Title "WELCOME TO $($script:AppName.ToUpper())"
     Write-Host "  This takes about two minutes. Every question has a sensible default -"
     Write-Host "  just press Enter to accept it. The full guide is 'How to use.html' in the"
-    Write-Host "  Camera Ingest folder (or press G in the main menu) - read its iCloud section before"
-    Write-Host "  sending photos to iCloud."
+    Write-Host "  Camera Ingest folder (or press G in the main menu)."
+    if (Get-ICloudPhotosFolder) { Write-Host "  Read its iCloud section before sending photos to iCloud." }
     Write-Host ""
     $cfg = New-DefaultConfig
     Write-Host "  STEP 1 of 3 - Library folder" -ForegroundColor Cyan
     Write-Host "  Each camera gets a folder here for its originals, RAW files and import"
-    Write-Host "  history. Finished photos can go here too, or to iCloud / OneDrive / anywhere."
+    Write-Host "  history. Finished photos can go here too, or to any other folder."
     $cfg.libraryRoot = Read-Folder "Where should the library live?" $cfg.libraryRoot
     try { New-Item -ItemType Directory -Path $cfg.libraryRoot -Force -ErrorAction Stop | Out-Null }
     catch { Write-Host "  Couldn't create it ($($_.Exception.Message)) - change it later in Settings." -ForegroundColor Yellow }
@@ -889,7 +890,8 @@ while ($true) {
     Write-Host "    5  Review a folder of photos (rotate / delete)"
     Write-Host "    6  Import history"
     Write-Host "    7  Settings and tools"
-    Write-Host "    G  Guide (opens in your browser - iCloud setup is in there)"
+    $gtext = "    G  Guide (opens in your browser)"; if (Get-ICloudPhotosFolder) { $gtext += " - iCloud setup is in there" }
+    Write-Host $gtext
     Write-Host "    H  Help"
     Write-Host "    Q  Quit"
     switch (Read-Choice "Choose" @("1", "2", "3", "4", "5", "6", "7", "G", "H", "Q")) {

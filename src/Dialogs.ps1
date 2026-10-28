@@ -412,7 +412,8 @@ function Show-CameraDialog($owner, $cfg, [int]$index = -1) {
     $c.convert = New-DlgCheck "&Convert AVI, MPG and MTS video to MP4 (originals retained)" 10 44
     $gi.Controls.AddRange(@($c.deleteCard, $c.convert))
     $gr = New-DlgGroup "RAW Files (ARW, NEF, CR2, DNG)" 10 90 476 66; $tImport.Controls.Add($gr)
-    $c.rawLocal = New-DlgRadio "Retain RAW locally and export JPEG (recommended for iCloud)" 10 20
+    $rawText = "Retain RAW locally and export JPEG"; if ($s.icloud) { $rawText += " (recommended for iCloud)" }
+    $c.rawLocal = New-DlgRadio $rawText 10 20
     $c.rawCopy = New-DlgRadio "Export RAW files unchanged" 10 42
     $gr.Controls.AddRange(@($c.rawLocal, $c.rawCopy))
     $gv = New-DlgGroup "Review Before Export" 10 162 476 86; $tImport.Controls.Add($gv)
@@ -742,7 +743,9 @@ function Show-WelcomeDialog($owner) {
     $logo.BackColor = $RetroNavy; $logo.ForeColor = $RetroWhite; $logo.TextAlign = "MiddleCenter"; $logo.BorderStyle = "Fixed3D"
     $logo.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Bold)
     $d.body.Controls.Add($logo)
-    $d.body.Controls.Add((New-DlgLabel "Select the library location. Each camera uses a subfolder of the library for originals and import history.`n`nThe export destination (library, iCloud Photos or another folder) is configured separately for each camera." 122 0 344 92))
+    $icloud = Get-ICloudPhotosFolder
+    $where = "library or another folder"; if ($icloud) { $where = "library, iCloud Photos or another folder" }
+    $d.body.Controls.Add((New-DlgLabel "Select the library location. Each camera uses a subfolder of the library for originals and import history.`n`nThe export destination ($where) is configured separately for each camera." 122 0 344 92))
     $d.body.Controls.Add((New-DlgLabel "&Library folder:" 0 106))
     $c.library = New-DlgText 0 124 380 $cfg.libraryRoot; $d.body.Controls.Add($c.library)
     $c.browse = New-DlgButton "&Browse" 388 123 80; $d.body.Controls.Add($c.browse)
@@ -751,7 +754,8 @@ function Show-WelcomeDialog($owner) {
     elseif (-not $winget) { $c.ffmpeg.Text = "Video converter: can be installed later from Settings"; $c.ffmpeg.Enabled = $false }
     else { $c.ffmpeg.Checked = $true }
     $d.body.Controls.Add($c.ffmpeg)
-    $d.body.Controls.Add((New-DlgLabel "Camera configuration follows. Refer to the iCloud section of the User Guide before exporting to iCloud Photos." 0 194 468 30))
+    $next = "Camera configuration follows."; if ($icloud) { $next += " Refer to the iCloud section of the User Guide before exporting to iCloud Photos." }
+    $d.body.Controls.Add((New-DlgLabel $next 0 194 468 30))
 
     $c.ok = New-DlgButton "&Next >" 312 244 80
     $c.cancel = New-DlgButton "Cancel" 398 244 70; $c.cancel.DialogResult = "Cancel"
