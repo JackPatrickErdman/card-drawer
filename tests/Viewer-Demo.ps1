@@ -62,6 +62,13 @@ $atEnd = Get-StripIndex $long ($w - 5)
 Show-StripItem $long 400; Update-Viewer $long
 $at400 = @(0..($w - 1) | Where-Object { (Get-StripIndex $long $_) -eq 400 }).Count
 Show-StripItem $long 0; Update-Viewer $long
+# ---- the maximize button (and double-clicking the title bar) ----
+$maxOk = $true; try { Switch-RetroMaximize $long.form } catch { $maxOk = $false; Write-Host "        $_" }
+Update-Viewer $long
+$wa = [System.Windows.Forms.Screen]::FromControl($long.form).WorkingArea
+Check "maximize works and stays clear of the taskbar ($($long.form.Height) of $($wa.Height))" ($maxOk -and $long.form.WindowState -eq "Maximized" -and $long.form.Height -le $wa.Height -and $long.form.Width -le $wa.Width)
+Switch-RetroMaximize $long.form; Update-Viewer $long
+Check "restore returns to normal size" ($long.form.WindowState -eq "Normal" -and $long.form.Width -eq 900)
 Check "700-photo strip: last tile reachable ($atEnd), tile 400 has its own place ($at400 px), back to the start ($(Get-StripIndex $long 5))" ($atEnd -eq 699 -and $at400 -eq $TilePitch -and (Get-StripIndex $long 5) -eq 0)
 Close-Viewer $long
 
@@ -100,6 +107,16 @@ foreach ($b in @($sh.NameSpace(10).Items() | Where-Object { $_.Name -like "Demo 
 
 # ---- the real engine in window mode: copy, review (delete one, turn one), send ----
 . (Join-Path $PSScriptRoot "..\src\Engine.ps1")
+# a long conversion must show it's still working
+$busy = New-PhotoViewer "Importing - Busy"; Show-Viewer $busy
+$script:Pump = { [System.Windows.Forms.Application]::DoEvents() }
+$script:BusyLabel = "Converting TEST.MPG"; $script:BusyViewer = $busy; $script:BusyStart = [datetime]::Now.AddSeconds(-75)
+$bc = Invoke-External "powershell.exe" @("-NoProfile", "-Command", "Start-Sleep -Milliseconds 800")
+$bt = $busy.status.Text
+$script:BusyLabel = ""; $script:Pump = $null; $script:BusyViewer = $null
+Close-Viewer $busy
+Check "conversion shows its running time ($bt)" ($bc -eq 0 -and $bt -match '^Converting TEST\.MPG - 1:1\d elapsed')
+
 $card = Join-Path $Root "card"
 New-Item -ItemType Directory -Path (Join-Path $card "DCIM\100") -Force | Out-Null
 for ($i = 1; $i -le 4; $i++) {

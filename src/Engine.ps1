@@ -65,7 +65,14 @@ function Invoke-External([string]$exe, [string[]]$argv) {
     $psi.FileName = $exe; $psi.Arguments = ($quoted -join " ")
     $psi.UseShellExecute = $false; $psi.CreateNoWindow = $true
     $p = [System.Diagnostics.Process]::Start($psi)
-    while (-not $p.HasExited) { & $script:Pump; Start-Sleep -Milliseconds 40 }
+    while (-not $p.HasExited) {
+        & $script:Pump
+        # a long conversion shows its running time, so the window never looks frozen
+        if ($script:BusyLabel -and $script:BusyViewer -and -not $script:BusyViewer.form.IsDisposed) {
+            $script:BusyViewer.status.Text = "{0} - {1:m\:ss} elapsed. Large videos can take several minutes." -f $script:BusyLabel, ([datetime]::Now - $script:BusyStart)
+        }
+        Start-Sleep -Milliseconds 40
+    }
     $p.WaitForExit()
     return $p.ExitCode
 }
@@ -755,7 +762,11 @@ function Invoke-CameraImportCore {
             $mp4Name = Get-FreeName $workDir "$newBase.MP4"
             $mp4Target = Join-Path $workDir $mp4Name
             Write-Host "     Converting to MP4" -ForegroundColor Gray
-            if (Convert-Video $copyTarget $mp4Target $tools $when) {
+            $script:BusyLabel = "Converting {0} ({1:N1} MB) to MP4" -f $f.Name, ($f.Length / 1MB)
+            $script:BusyViewer = $ui.viewer; $script:BusyStart = [datetime]::Now
+            $converted = Convert-Video $copyTarget $mp4Target $tools $when
+            $script:BusyLabel = ""
+            if ($converted) {
                 Set-FileTimes $mp4Target $when
                 $result.converted++
                 $toSend = $mp4Target

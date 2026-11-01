@@ -34,7 +34,12 @@ $RetroMono    = New-Object System.Drawing.Font("Lucida Console", 8.25)
 function Switch-RetroMaximize($form) {
     # a borderless window would cover the taskbar when maximized - keep to the work area
     if ($form.WindowState -eq "Maximized") { $form.WindowState = "Normal"; return }
-    $form.MaximizedBounds = [System.Windows.Forms.Screen]::FromControl($form).WorkingArea
+    # MaximizedBounds is protected, so it can only be set through reflection; Windows reads
+    # its position relative to the monitor the window is on
+    $scr = [System.Windows.Forms.Screen]::FromControl($form)
+    $area = $scr.WorkingArea
+    $area.Offset(-$scr.Bounds.X, -$scr.Bounds.Y)
+    [System.Windows.Forms.Form].GetProperty("MaximizedBounds", [System.Reflection.BindingFlags]"Instance,NonPublic").SetValue($form, $area, $null)
     $form.WindowState = "Maximized"
 }
 
