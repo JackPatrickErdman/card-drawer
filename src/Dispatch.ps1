@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - dispatcher
+#  Card Drawer - dispatcher
 #  Looks at everything plugged in, works out which of your
 #  cameras each card belongs to, and runs the import for each.
 #  SPACE afterwards = swap cards and scan again.

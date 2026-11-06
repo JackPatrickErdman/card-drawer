@@ -1,12 +1,12 @@
 # ============================================================
-#  Camera Ingest - shared helpers
+#  Card Drawer - shared helpers
 #  Config load/save, camera profiles, drive scanning, camera
 #  recognition, tool discovery and the small text-menu helpers
 #  every screen uses. Dot-sourced by Menu.ps1 and Import.ps1.
 #  Plain Windows PowerShell 5.1 - nothing to install.
 # ============================================================
 
-$script:AppName    = "Camera Ingest"
+$script:AppName    = "Card Drawer"
 $script:AppVersion = "0.1.0"
 $script:AppRoot    = Split-Path -Parent $PSScriptRoot
 
@@ -65,8 +65,8 @@ function New-CameraProfile([string]$name) {
         review         = "ask"       # after an import: "ask" to open the review window, "always" open it, "never"
         autoStart      = $false      # $true = start importing this camera's cards without asking first
         photoHook      = ""          # advanced: command run on every staged JPG, {file} = its path
-        kind           = "card"      # "card" = Camera Ingest imports it; "special" = a camera with its own
-                                     # importer (Wi-Fi, cable...) that Camera Ingest lists and launches
+        kind           = "card"      # "card" = Card Drawer imports it; "special" = a camera with its own
+                                     # importer (Wi-Fi, cable...) that Card Drawer lists and launches
         program        = ""          # special: the importer to run - a .bat, .cmd, .ps1 or .exe
         arguments      = ""          # special: what to pass it
         about          = ""          # special: one line on how this camera's photos come in
@@ -275,7 +275,7 @@ function Get-DatesText($cam) {
 function New-DefaultConfig {
     [ordered]@{
         version     = 1
-        libraryRoot = (Join-Path $env:USERPROFILE "Pictures\Camera Ingest")
+        libraryRoot = (Join-Path $env:USERPROFILE "Pictures\Card Drawer")
         tools       = [ordered]@{ handbrake = ""; ffmpeg = ""; python = "" }
         cameras     = @()
     }

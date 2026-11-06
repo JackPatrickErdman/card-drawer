@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - point-and-click dialogs (Windows 98 style)
+#  Card Drawer - point-and-click dialogs (Windows 98 style)
 #    Show-CameraDialog   add or change a camera: a property sheet
 #                        with General / Recognize / Files / Import
 #                        tabs and a live file-name preview
@@ -87,7 +87,7 @@ function Show-Modal($dialog, $owner) {
 }
 
 function Show-DlgMessage($owner, [string]$text, [string]$icon = "Information", [string]$buttons = "OK") {
-    return [System.Windows.Forms.MessageBox]::Show($owner, $text, "Camera Ingest", $buttons, $icon)
+    return [System.Windows.Forms.MessageBox]::Show($owner, $text, "Card Drawer", $buttons, $icon)
 }
 
 function Test-Regex([string]$rx) {
@@ -730,7 +730,7 @@ function Show-SettingsDialog($owner, $cfg) {
 
 function Show-WelcomeDialog($owner) {
     # returns a new config (already saved by the caller) or $null if cancelled
-    $d = New-RetroDialog "Camera Ingest Setup" 500 330
+    $d = New-RetroDialog "Card Drawer Setup" 500 330
     $form = $d.form
     $cfg = New-DefaultConfig
     $tools = Get-Tools $cfg

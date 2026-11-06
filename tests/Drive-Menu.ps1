@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - scripted menu walkthrough
+#  Card Drawer - scripted menu walkthrough
 #  Runs the real menus with a list of typed answers, printing
 #  every prompt and answer, so the whole first-run experience
 #  can be checked without a person at the keyboard.

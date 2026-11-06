@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - the import engine
+#  Card Drawer - the import engine
 #  Takes ONE source (card, drive or folder) and ONE camera
 #  profile and imports it:
 #    - SHA256 ledger per camera: nothing ever imports twice
@@ -219,7 +219,7 @@ function Invoke-CameraImport {
         Write-Host "  $($Camera.name) uses an external importer. Run it from the camera list." -ForegroundColor Yellow
         return @{ copied = 0; skippedDup = 0; deleted = 0; converted = 0; rendered = 0; failed = 1; cardLost = $false }
     }
-    $lockPath = Join-Path $env:TEMP "camera-ingest-import.lock"
+    $lockPath = Join-Path $env:TEMP "card-drawer-import.lock"
     try {
         $lock = [System.IO.File]::Open($lockPath, "OpenOrCreate", "ReadWrite", "None")
     } catch {

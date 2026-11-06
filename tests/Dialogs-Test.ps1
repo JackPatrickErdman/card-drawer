@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - dialog checks
+#  Card Drawer - dialog checks
 #  Opens the Add Camera, Camera Settings, Settings and Welcome
 #  dialogs, fills them in with a timer the way a person would,
 #  snapshots every tab, presses OK / Cancel, and checks what was
@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "..\src\Common.ps1")
 . (Join-Path $PSScriptRoot "..\src\Dialogs.ps1")
 
-$Root = Join-Path $env:TEMP ("camera-ingest-dialogs-" + (Get-Date -Format "yyyyMMddHHmmss"))
+$Root = Join-Path $env:TEMP ("card-drawer-dialogs-" + (Get-Date -Format "yyyyMMddHHmmss"))
 New-Item -ItemType Directory -Path $Root -Force | Out-Null
 if (-not $Out) { $Out = $Root }
 $script:pass = 0; $script:fail = 0
@@ -111,7 +111,7 @@ $drv.Stop()
 Check "settings dialog saved the library folder" ($saved -and $cfg.libraryRoot -eq $newLib)
 
 # ---- Welcome: picture, then Cancel ----
-$drv = Start-Driver "Camera Ingest Setup*" @(
+$drv = Start-Driver "Card Drawer Setup*" @(
     { param($f) Snap $f "dlg-welcome.png" },
     { param($f) $f.Tag.c.cancel.PerformClick() }
 )

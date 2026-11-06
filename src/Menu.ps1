@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - main menu
+#  Card Drawer - main menu
 #  Everything is set up from here with numbered menus: first-run
 #  setup, adding cameras (with the card plugged in, so it can be
 #  recognized), editing them, tools, and importing.
@@ -613,7 +613,7 @@ function Edit-CameraMenu($cfg, [int]$index) {
                 $desc = Read-Text "One line saying what it's for" "" -AllowEmpty
                 $file = Save-CameraAsPreset $cam $title $desc
                 Write-Host "  Saved: $file" -ForegroundColor Green
-                Write-Host "  Copy that file into another Camera Ingest's presets folder to use it there." -ForegroundColor Gray
+                Write-Host "  Copy that file into another Card Drawer's presets folder to use it there." -ForegroundColor Gray
             }
             "B" { return }
         }
@@ -753,7 +753,7 @@ function Import-FromFolder($cfg) {
     Write-Host ("  {0} photo(s), {1} video(s), {2} MB" -f $src.photos.Count, $src.videos.Count, $src.sizeMB)
     $hit = Find-CameraForSource $cfg $src
     Write-Host ""
-    # only cameras Camera Ingest imports itself (not the ones with their own importer)
+    # only cameras Card Drawer imports itself (not the ones with their own importer)
     $choices = @($cfg.cameras | Where-Object { -not (Test-SpecialCamera $_) })
     if ($choices.Count -eq 0) { Write-Host "  Add a camera first." -ForegroundColor Yellow; Wait-Key; return }
     $d = ""
@@ -810,7 +810,7 @@ function Invoke-FirstRunSetup {
     Write-Title "WELCOME TO $($script:AppName.ToUpper())"
     Write-Host "  This takes about two minutes. Every question has a sensible default -"
     Write-Host "  just press Enter to accept it. The full guide is 'How to use.html' in the"
-    Write-Host "  Camera Ingest folder (or press G in the main menu)."
+    Write-Host "  Card Drawer folder (or press G in the main menu)."
     if (Get-ICloudPhotosFolder) { Write-Host "  Read its iCloud section before sending photos to iCloud." }
     Write-Host ""
     $cfg = New-DefaultConfig

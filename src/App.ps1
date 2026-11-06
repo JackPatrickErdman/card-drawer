@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - the window app (retro, Windows 98 style)
+#  Card Drawer - the window app (retro, Windows 98 style)
 #  A plain front end over the same engine as the text menus:
 #    - shows the cards plugged in and which camera each belongs to
 #      (refreshes by itself when a card goes in or comes out)
@@ -37,7 +37,7 @@ function Quote([string]$s) { "'" + $s.Replace("'", "''") + "'" }
 # ============================================================
 #  Window frame (Retro.ps1): borderless form + hand-drawn title bar
 # ============================================================
-$win = New-RetroWindow "Camera Ingest" 800 600
+$win = New-RetroWindow "Card Drawer" 800 600
 $form = $win.form
 # Event code runs while dialogs are open, and dialogs have their own $form - so code that
 # can run then uses this name, which only ever means the main window
@@ -94,7 +94,7 @@ $logo = New-Object System.Windows.Forms.Label
 $logo.BorderStyle = "Fixed3D"
 $logo.BackColor = $Navy; $logo.ForeColor = $White
 $logo.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 11, [System.Drawing.FontStyle]::Bold)
-$logo.Text = "CAMERA`nINGEST"
+$logo.Text = "CARD`nDRAWER"
 $logo.TextAlign = "MiddleCenter"
 $logo.Location = New-Object System.Drawing.Point(0, 4)
 $logo.Size = New-Object System.Drawing.Size(140, 58)
@@ -250,7 +250,7 @@ function Set-Busy([bool]$busy, [string]$text) {
 function Start-Engine([string]$extraArgs, [string]$what) {
     # Import.ps1 in a window-less PowerShell; everything it prints goes to a log file that
     # the timer below copies into the Activity box
-    $logFile = Join-Path $env:TEMP ("camera-ingest-run-{0}.log" -f [guid]::NewGuid().ToString("N"))
+    $logFile = Join-Path $env:TEMP ("card-drawer-run-{0}.log" -f [guid]::NewGuid().ToString("N"))
     $cmd = "& " + (Quote (Join-Path $PSScriptRoot "Import.ps1")) + " -Gui -ConfigPath " + (Quote $ConfigPath) + " $extraArgs *> " + (Quote $logFile)
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "powershell.exe"
@@ -327,7 +327,7 @@ $timer.Add_Tick({
 #  Actions
 # ============================================================
 function Show-Info([string]$text, [string]$icon = "Information") {
-    [void][System.Windows.Forms.MessageBox]::Show($script:mainForm, $text, "Camera Ingest", "OK", $icon)
+    [void][System.Windows.Forms.MessageBox]::Show($script:mainForm, $text, "Card Drawer", "OK", $icon)
 }
 
 function Invoke-ImportNow {
@@ -431,7 +431,7 @@ function Invoke-AddCamera {
     if (-not (Save-AppConfig)) { return }
     Write-Log "Camera added: $($r.camera.name)`n"
     if ($r.source -and $r.source.media.Count -gt 0) {
-        $go = [System.Windows.Forms.MessageBox]::Show($script:mainForm, "Run a practice import from this card?`n`nFiles are copied to a practice folder to preview names and dates. The card is not modified and nothing is exported.", "Camera Ingest", "YesNo", "Question")
+        $go = [System.Windows.Forms.MessageBox]::Show($script:mainForm, "Run a practice import from this card?`n`nFiles are copied to a practice folder to preview names and dates. The card is not modified and nothing is exported.", "Card Drawer", "YesNo", "Question")
         if ($go -eq "Yes") { Start-PracticeRun $r.camera.name $r.source.root }
     }
 }
@@ -460,7 +460,7 @@ function Invoke-AddSpecial {
 }
 
 function Invoke-RunSpecial {
-    # start a special camera's own importer in its own window; Camera Ingest waits for it
+    # start a special camera's own importer in its own window; Card Drawer waits for it
     if (Test-Busy) { return }
     $i = Get-SelectedCamera
     if ($i -lt 0 -or -not (Test-SpecialCamera $script:cfg.cameras[$i])) {
@@ -528,7 +528,7 @@ function Remove-SelectedCamera {
     $i = Get-SelectedCamera
     if ($i -lt 0) { Show-Info "Select a camera in the Cameras list."; return }
     $name = $script:cfg.cameras[$i].name
-    $ok = [System.Windows.Forms.MessageBox]::Show($script:mainForm, "Remove the camera profile $name?`n`nImported files, originals and import history are not affected.", "Camera Ingest", "YesNo", "Question")
+    $ok = [System.Windows.Forms.MessageBox]::Show($script:mainForm, "Remove the camera profile $name?`n`nImported files, originals and import history are not affected.", "Card Drawer", "YesNo", "Question")
     if ($ok -ne "Yes") { return }
     $script:cfg.cameras = @($script:cfg.cameras | Where-Object { $_.name -ne $name })
     [void](Save-AppConfig)
@@ -570,7 +570,7 @@ function Invoke-OpenLibrary {
 }
 
 function Invoke-Shortcut {
-    $lnk = Join-Path ([Environment]::GetFolderPath("Desktop")) "Camera Ingest.lnk"
+    $lnk = Join-Path ([Environment]::GetFolderPath("Desktop")) "Card Drawer.lnk"
     $sh = New-Object -ComObject WScript.Shell
     $s = $sh.CreateShortcut($lnk)
     $s.TargetPath = "powershell.exe"
@@ -578,11 +578,11 @@ function Invoke-Shortcut {
     $s.WorkingDirectory = $script:AppRoot
     $s.Description = "Import memory cards by camera"
     $s.Save()
-    Show-Info "A Camera Ingest shortcut was created on the desktop."
+    Show-Info "A Card Drawer shortcut was created on the desktop."
 }
 
 function Invoke-About {
-    Show-Info ("Camera Ingest`nVersion $($script:AppVersion)`n`nImports memory cards by camera profile: identifies each card, applies naming, date and conversion rules, and prevents duplicate imports.`n`nMIT License")
+    Show-Info ("Card Drawer`nVersion $($script:AppVersion)`n`nImports memory cards by camera profile: identifies each card, applies naming, date and conversion rules, and prevents duplicate imports.`n`nMIT License")
 }
 
 # ---- buttons ----
@@ -647,7 +647,7 @@ Add-MenuItem $mTools "-" $null
 $miText = Add-MenuItem $mTools "&Text Mode" { Invoke-TextMenus }
 $null = Add-MenuItem $mHelp "User &Guide" { Invoke-Guide }
 Add-MenuItem $mHelp "-" $null
-$null = Add-MenuItem $mHelp "&About Camera Ingest" { Invoke-About }
+$null = Add-MenuItem $mHelp "&About Card Drawer" { Invoke-About }
 
 $script:actionControls = @($bImport, $bFolder, $bAdd, $bEdit, $bReview, $bSet,
                            $miImport, $miFolder, $miRefresh, $miAdd, $miAddS, $miRunS, $miEdit, $miPrac, $miTest, $miUp, $miDown, $miRem,
@@ -680,7 +680,7 @@ $script:mainForm.Add_Shown({
         Write-Log "Ready. Insert a memory card and select Import Now.`n"
         Set-Status "Ready"
     } else {
-        Write-Log "Camera Ingest is not configured. Select Set Up to choose a library folder and add a camera.`n"
+        Write-Log "Card Drawer is not configured. Select Set Up to choose a library folder and add a camera.`n"
         Set-Status "Not configured"
     }
     $timer.Start()

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Camera Ingest Guide</title>
+<title>Card Drawer Guide</title>
 <style>
   :root {
     --bg: #fbfaf7; --panel: #ffffff; --ink: #1d1f22; --muted: #5d636b; --line: #e3e0d8;
@@ -57,7 +57,7 @@
 <div class="wrap">
 
 <header>
-  <h1>Camera Ingest</h1>
+  <h1>Card Drawer</h1>
   <p>How to set it up, import your cards, and send everything to iCloud Photos safely.</p>
 </header>
 
@@ -78,7 +78,7 @@
 
 <!-- ------------------------------------------------------------ -->
 <h2 id="what">1. What it does</h2>
-<p>You put a memory card in your computer. Camera Ingest works out <b>which of your cameras
+<p>You put a memory card in your computer. Card Drawer works out <b>which of your cameras
 it came from</b> and copies everything off it the way you set up for that camera:</p>
 <ul>
   <li>Files are renamed <code>Sony T7 (1).JPG</code>, <code>Sony T7 (2).JPG</code>&hellip; so two cameras never
@@ -96,12 +96,12 @@ it came from</b> and copies everything off it the way you set up for that camera
 
 <!-- ------------------------------------------------------------ -->
 <h2 id="install">2. Installing</h2>
-<p>You need Windows 10 or 11 and a card reader (built-in, or a cheap USB one). Nothing else has to be installed first.</p>
+<p>You need Windows 10 or 11 and a card reader (built-in, or a cheap USB one). Nothing else has to be installed first. A Mac version is on the way.</p>
 <ol class="steps">
   <li><b>Before unzipping:</b> right-click the downloaded zip &rarr; <b>Properties</b> &rarr; tick <b>Unblock</b>
       (if you see it) &rarr; <b>OK</b>. This stops Windows from blocking every file inside.</li>
-  <li>Unzip it somewhere permanent, like <code>Documents\Camera Ingest</code>.</li>
-  <li>Double-click <b><code>Camera Ingest.bat</code></b>. The Camera Ingest window opens. For one-click
+  <li>Unzip it somewhere permanent, like <code>Documents\Card Drawer</code>.</li>
+  <li>Double-click <b><code>Card Drawer.bat</code></b>. The Card Drawer window opens. For one-click
       opening from now on, choose <b>File &rarr; Create Desktop Shortcut</b>.</li>
 </ol>
 <h3>The window</h3>
@@ -124,9 +124,9 @@ Click <b>More info</b> &rarr; <b>Run anyway</b>. Everything it does is in plain-
 
 <!-- ------------------------------------------------------------ -->
 <h2 id="setup">3. First-time setup</h2>
-<p>The first time, click <b>Set Up</b>. The Camera Ingest Setup window asks two things:</p>
+<p>The first time, click <b>Set Up</b>. The Card Drawer Setup window asks two things:</p>
 <ul>
-  <li><b>Library folder</b> &ndash; keep the suggested <code>Pictures\Camera Ingest</code> or click <b>Browse</b>. Each
+  <li><b>Library folder</b> &ndash; keep the suggested <code>Pictures\Card Drawer</code> or click <b>Browse</b>. Each
       camera gets a folder here for originals, RAW files and its import history.</li>
   <li><b>Install the free video converter</b> &ndash; leave it ticked if any camera records video. It downloads ffmpeg
       from the official source through Windows' own installer (a black window shows the progress).</li>
@@ -227,7 +227,7 @@ do they move on to iCloud or your destination folder. That order matters for iCl
 
 <!-- ------------------------------------------------------------ -->
 <h2 id="icloud">7. Sending photos to iCloud</h2>
-<p>Camera Ingest doesn't talk to Apple's servers. It hands photos to Apple's own <b>iCloud for Windows</b> app by
+<p>Card Drawer doesn't talk to Apple's servers. It hands photos to Apple's own <b>iCloud for Windows</b> app by
 putting them in the folder that app watches, and that app does the uploading. So iCloud for Windows has to be set up
 first.</p>
 
@@ -256,14 +256,14 @@ appear in your library, by the date they were taken.</p>
 check your iPhone's Photos app (or <code>icloud.com/photos</code>) after a few minutes.</p>
 <div class="warn"><b>Why the test matters</b>
 Apple documents two ways to upload from a PC: dragging photos onto <b>iCloud Photos</b> in File Explorer, or
-right-click &rarr; <b>Share</b> &rarr; <b>iCloud Photos</b>. Camera Ingest copies files into a folder inside iCloud
+right-click &rarr; <b>Share</b> &rarr; <b>iCloud Photos</b>. Card Drawer copies files into a folder inside iCloud
 Photos instead. That's how the author's own library has been fed for months, but it isn't one of Apple's documented
 methods, and iCloud for Windows changes between versions. The test takes two minutes and confirms it works on your
 PC before you rely on it.</div>
 
-<h3>The rules iCloud plays by, and what Camera Ingest does about each</h3>
+<h3>The rules iCloud plays by, and what Card Drawer does about each</h3>
 <table>
-  <tr><th>iCloud&hellip;</th><th>So Camera Ingest&hellip;</th></tr>
+  <tr><th>iCloud&hellip;</th><th>So Card Drawer&hellip;</th></tr>
   <tr><td><b>Uploads a file the moment it lands in the folder.</b> Apple says edits you make on a PC afterwards
           <i>don't appear on your Apple devices</i>.</td>
       <td>Holds photos in the local <code>Incoming</code> folder until you've had the chance to rotate or delete
@@ -344,9 +344,9 @@ was called on the card, what it's called now, and when. It opens in Excel.</div>
 <table>
   <tr><th>Problem</th><th>Try this</th></tr>
   <tr><td>"No memory card or USB drive found" but the camera is plugged in</td>
-      <td>Cameras plugged in by USB often appear as a "portable device" with no drive letter, and Camera Ingest needs
+      <td>Cameras plugged in by USB often appear as a "portable device" with no drive letter, and Card Drawer needs
           a drive letter. Take the card out and use a card reader.</td></tr>
-  <tr><td>"Another Camera Ingest window is importing right now"</td>
+  <tr><td>"Another Card Drawer window is importing right now"</td>
       <td>Let the other window finish, or close it, then try again. If no other window is open, restart the PC.</td></tr>
   <tr><td>A card shows as <code>[ unknown ]</code></td>
       <td>No camera claims it yet. Use <b>Add Camera</b>, or double-click the camera &rarr; <b>1 Recognition rules
@@ -364,7 +364,7 @@ was called on the card, what it's called now, and when. It opens in Excel.</div>
       <td>Normal after a crash or closed window. They were safely copied but not sent yet. Review them, then they go out.</td></tr>
 </table>
 <p style="color:var(--muted);margin-top:32px">Settings live in <code>data\config.json</code> next to
-<code>Camera Ingest.bat</code>. Removing Camera Ingest means deleting its folder; your library and photos stay where they are.</p>
+<code>Card Drawer.bat</code>. Removing Card Drawer means deleting its folder; your library and photos stay where they are.</p>
 
 </div>
 </body>

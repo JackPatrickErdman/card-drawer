@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - self tests
+#  Card Drawer - self tests
 #  Builds fake cards in a temp folder (JPEGs with a camera model
 #  in EXIF, a RAW+JPEG pair, an AVI and an MP4) and checks the
 #  matcher and the import engine end to end. Never touches real
@@ -12,7 +12,7 @@
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "..\src\Engine.ps1")
 
-$Root = Join-Path $env:TEMP ("camera-ingest-tests-" + (Get-Date -Format "yyyyMMddHHmmss"))
+$Root = Join-Path $env:TEMP ("card-drawer-tests-" + (Get-Date -Format "yyyyMMddHHmmss"))
 New-Item -ItemType Directory -Path $Root -Force | Out-Null
 $script:pass = 0; $script:fail = 0; $script:skip = 0
 

@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - main window check
+#  Card Drawer - main window check
 #  Opens the real window on a test setup and presses every button
 #  and menu command that opens a dialog (App.ps1 -SelfTest), then
 #  checks each dialog actually appeared and nothing errored. This
@@ -9,7 +9,7 @@
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "..\src\Common.ps1")
-$Root = Join-Path $env:TEMP ("camera-ingest-app-" + (Get-Date -Format "yyyyMMddHHmmss"))
+$Root = Join-Path $env:TEMP ("card-drawer-app-" + (Get-Date -Format "yyyyMMddHHmmss"))
 New-Item -ItemType Directory -Path $Root -Force | Out-Null
 $script:pass = 0; $script:fail = 0
 function Check([string]$what, [bool]$ok) {

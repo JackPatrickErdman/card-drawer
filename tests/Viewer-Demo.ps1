@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - photo viewer demo / check
+#  Card Drawer - photo viewer demo / check
 #  Builds a few test photos, runs the viewer through an "import"
 #  and a scripted review (rotate one, delete one), saves a picture
 #  of each mode, and checks the files on disk afterwards.
@@ -10,7 +10,7 @@ param([string]$Out = "")
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "..\src\Viewer.ps1")
 
-$Root = Join-Path $env:TEMP ("camera-ingest-viewer-" + (Get-Date -Format "yyyyMMddHHmmss"))
+$Root = Join-Path $env:TEMP ("card-drawer-viewer-" + (Get-Date -Format "yyyyMMddHHmmss"))
 New-Item -ItemType Directory -Path (Join-Path $Root "Incoming") -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $Root "RAW Originals") -Force | Out-Null
 if (-not $Out) { $Out = $Root }

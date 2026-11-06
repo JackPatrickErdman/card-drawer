@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - the Windows 98 look, shared by every window
+#  Card Drawer - the Windows 98 look, shared by every window
 #  Palette, fonts, and New-RetroWindow: a borderless form with
 #  a raised 3D frame and a hand-drawn navy title bar (drag to
 #  move, double-click to maximize, real Marlett caption glyphs).

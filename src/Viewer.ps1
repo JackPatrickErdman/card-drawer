@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - the photo viewer (one window, two modes)
+#  Card Drawer - the photo viewer (one window, two modes)
 #    IMPORT  opens when an import starts: the photo just copied
 #            shown big, a filmstrip of thumbnails growing along
 #            the bottom, old name -> new name, a progress bar.
@@ -436,7 +436,7 @@ function Save-CurrentRotation($v) {
         if ($old) { $old.Dispose() }
         $v.strip.Invalidate()
     } catch {
-        [void][System.Windows.Forms.MessageBox]::Show($v.form, "$($_.Exception.Message)", "Camera Ingest", "OK", "Warning")
+        [void][System.Windows.Forms.MessageBox]::Show($v.form, "$($_.Exception.Message)", "Card Drawer", "OK", "Warning")
     }
     $v.rot = 0
 }
@@ -526,7 +526,7 @@ function Invoke-ViewerReview($v, [string[]]$files, [string[]]$companions, [strin
     # good, without asking - so ask here, and keep the photos if the answer is no
     $noBin = @($marked | Where-Object { -not (Test-HasRecycleBin $_) })
     if ($noBin.Count -gt 0 -and -not $v.form.IsDisposed) {
-        $ans = [System.Windows.Forms.MessageBox]::Show($v.form, ("{0} of the selected files are on a drive without a Recycle Bin (memory card, USB drive or network folder).`n`nDelete these files permanently?" -f $noBin.Count), "Camera Ingest", "YesNo", "Warning", "Button2")
+        $ans = [System.Windows.Forms.MessageBox]::Show($v.form, ("{0} of the selected files are on a drive without a Recycle Bin (memory card, USB drive or network folder).`n`nDelete these files permanently?" -f $noBin.Count), "Card Drawer", "YesNo", "Warning", "Button2")
         if ($ans -ne "Yes") { $marked = @($marked | Where-Object { $noBin -notcontains $_ }) }
     }
     $deleted = 0

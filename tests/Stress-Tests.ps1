@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - stress tests: "can it ever lose a photo?"
+#  Card Drawer - stress tests: "can it ever lose a photo?"
 #  Every scenario checks two rules:
 #    NO LOSS     every file that was on the card before the run
 #                still exists byte-for-byte afterwards - still on
@@ -20,7 +20,7 @@ $ErrorActionPreference = "Stop"
 if (-not $Seed) { $Seed = Get-Random -Maximum 100000 }
 $rng = New-Object System.Random($Seed)
 
-$Root = Join-Path $env:TEMP ("camera-ingest-stress-" + (Get-Date -Format "yyyyMMddHHmmss"))
+$Root = Join-Path $env:TEMP ("card-drawer-stress-" + (Get-Date -Format "yyyyMMddHHmmss"))
 New-Item -ItemType Directory -Path $Root -Force | Out-Null
 $script:pass = 0; $script:fail = 0
 $env:INGEST_FAULT = ""
@@ -222,7 +222,7 @@ $cfgL = New-TestConfig "Locked"
 $card = New-SmallCard "lock_card"
 $snap = Snapshot $card $cfgL.libraryRoot
 $cardCount = @(Get-CardMedia $card).Count
-$held = [System.IO.File]::Open((Join-Path $env:TEMP "camera-ingest-import.lock"), "OpenOrCreate", "ReadWrite", "None")
+$held = [System.IO.File]::Open((Join-Path $env:TEMP "card-drawer-import.lock"), "OpenOrCreate", "ReadWrite", "None")
 $r = Import-Card $cfgL $card
 $held.Dispose()
 Check "second import refuses while one is running" ($r.busy -eq $true -and $r.copied -eq 0)

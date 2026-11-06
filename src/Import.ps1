@@ -1,5 +1,5 @@
 # ============================================================
-#  Camera Ingest - one-click / command-line import
+#  Card Drawer - one-click / command-line import
 #  No arguments: scan everything plugged in and import it
 #  (what "Import Now.bat" runs).
 #
@@ -24,7 +24,7 @@ $Host.UI.RawUI.WindowTitle = "$($script:AppName) - Import"
 
 $cfg = Read-Config $ConfigPath
 if (-not $cfg) {
-    Write-Host "  Not set up yet - open Camera Ingest.bat first." -ForegroundColor Yellow
+    Write-Host "  Not set up yet - open Card Drawer.bat first." -ForegroundColor Yellow
     if (-not $Yes -and -not $Gui) { Wait-Key "Press any key to close" }
     exit 1
 }
